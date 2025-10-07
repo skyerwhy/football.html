@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FootballAI - AI прогнозы на футбольные матчи</title>
+    <style>
+        :root {
+            --primary: #0a1929;
+            --secondary: #1e3a5c;
+            --accent: #00ff88;
+            --light: #e0f7fa;
+            --dark: #051321;
+            --success: #00c853;
+            --gray: #546e7a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-element {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        .floating-element:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .floating-element:nth-child(2) {
+            top: 60%;
+            left: 80%;
+            animation-delay: 2s;
+        }
+        
+        .floating-element:nth-child(3) {
+            top: 40%;
+            left: 40%;
+            animation-delay: 4s;
+        }
+        
+        .floating-element:nth-child(4) {
+            top: 80%;
+            left: 30%;
+            animation-delay: 6s;
+        }
+        
+        .floating-element:nth-child(5) {
+            top: 10%;
+            left: 70%;
+            animation-delay: 8s;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+                opacity: 0.7;
+            }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: rgba(10, 25, 41, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.2);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--dark);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            }
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--accent), var(--light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        nav a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: var(--accent);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            color: #b0bec5;
+        }
+        
+        .predictions-counter {
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 10px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            display: inline-block;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent), #00cc78);
+            color: var(--dark);
+            padding: 14px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+            position: relative;
+            overflow: hidden;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.6);
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        .section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .input-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .input-step {
+            display: none;
+            text-align: center;
+        }
+        
+        .input-step.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .step-title {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: var(--accent);
+        }
+        
+        .team-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px 20px;
+            border: 2px solid var(--gray);
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.7);
+            color: var(--light);
+            font-size: 18px;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+        }
+        
+        .team-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .next-button {
+            background: linear-gradient(135deg, var(--accent), #00cc78);
+            color: var(--dark);
+            border: none;
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .next-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.6);
+        }
+        
+        .next-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+        
+        .next-button:hover::before {
+            left: 100%;
+        }
+        
+        .upload-area {
+            border: 3px dashed var(--gray);
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(0, 255, 136, 0.05);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+        
+        .upload-icon {
+            font-size: 60px;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .upload-button {
+            background: linear-gradient(135deg, var(--accent), #00cc78);
+            color: var(--dark);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0, 255, 136, 0.4);
+        }
+        
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 255, 136, 0.6);
+        }
+        
+        .preview-container {
+            display: none;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        #image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .analyze-button {
+            background: linear-gradient(135deg, var(--accent), #00cc78);
+            color: var(--dark);
+            border: none;
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .analyze-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.6);
+        }
+        
+        .analyze-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+        
+        .analyze-button:hover::before {
+            left: 100%;
+        }
+        
+        .results-container {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            margin: 40px auto 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .match-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .team {
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .team-logo {
+            width: 100px;
+            height: 100px;
+            background: var(--light);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: var(--dark);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: bounceIn 1s;
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .team-name {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .vs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .prediction-result {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        
+        .prediction-title {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .prediction-details {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .prediction-item {
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .prediction-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .prediction-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .confidence-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), #00cc78);
+            border-radius: 5px;
+            width: 0;
+            transition: width 1.5s ease-in-out;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .confidence-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        .new-signal-button {
+            background: linear-gradient(135deg, var(--accent), #00cc78);
+            color: var(--dark);
+            border: none;
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .new-signal-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.6);
+        }
+        
+        .new-signal-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+        
+        .new-signal-button:hover::before {
+            left: 100%;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0, 255, 136, 0.2);
+        }
+        
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .feature-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        
+        .feature-description {
+            color: #b0bec5;
+        }
+        
+        footer {
+            background: rgba(10, 25, 41, 0.9);
+            padding: 40px 0;
+            margin-top: 80px;
+            border-top: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .footer-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #b0bec5;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #ff5252;
+            margin-top: 10px;
+            display: none;
+            font-weight: 500;
+        }
+        
+        .limit-message {
+            background: rgba(255, 82, 82, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            display: none;
+        }
+        
+        .input-hint {
+            color: var(--gray);
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                gap: 15px;
+            }
+            
+            .match-info {
+                flex-direction: column;
+            }
+            
+            .vs {
+                margin: 15px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+    
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">AI</div>
+                    <div class="logo-text">FootballAI</div>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#home">Главная</a></li>
+                        <li><a href="#analyze">Анализ матча</a></li>
+                        <li><a href="#features">Возможности</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>AI-прогнозы на футбольные матчи</h1>
+            <p>Получите точный прогноз на основе анализа AI и статистики команд</p>
+            <div class="predictions-counter" id="predictions-counter">
+                Осталось прогнозов: <span id="predictions-left">10</span>/10
+            </div>
+            <a href="#analyze" class="cta-button" id="start-button">Попробовать сейчас</a>
+        </div>
+    </section>
+
+    <section class="section" id="analyze">
+        <div class="container">
+            <h2 class="section-title">Анализ матча</h2>
+            <div class="input-container">
+                <div class="limit-message" id="limit-message">
+                    <h3>Лимит прогнозов исчерпан</h3>
+                    <p>Вы использовали все 10 прогнозов за 24 часа. Следующий прогноз будет доступен через: <span id="time-remaining">24:00:00</span></p>
+                </div>
+                
+                <!-- Шаг 1: Ввод первой команды -->
+                <div class="input-step active" id="step1">
+                    <h3 class="step-title">Впишите название первой команды</h3>
+                    <input type="text" class="team-input" id="team1-input" placeholder="Например, Реал Мадрид">
+                    <p class="input-hint">Вводите полное название команды с заглавной буквы</p>
+                    <p class="error-message" id="error1">Впишите полное название команды или же другую команду</p>
+                    <button class="next-button" id="next1">Далее</button>
+                </div>
+                
+                <!-- Шаг 2: Ввод второй команды -->
+                <div class="input-step" id="step2">
+                    <h3 class="step-title">Впишите название второй команды</h3>
+                    <input type="text" class="team-input" id="team2-input" placeholder="Например, Барселона">
+                    <p class="input-hint">Вводите полное название команды с заглавной буквы</p>
+                    <p class="error-message" id="error2">Впишите полное название команды или же другую команду</p>
+                    <button class="next-button" id="next2">Далее</button>
+                </div>
+                
+                <!-- Шаг 3: Загрузка скриншота -->
+                <div class="input-step" id="step3">
+                    <h3 class="step-title">Загрузите скриншот ставки с сайта</h3>
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-icon">📱</div>
+                        <p class="upload-text">Перетащите скриншот ставки сюда или нажмите для выбора</p>
+                        <p class="upload-hint">Поддерживаемые форматы: JPG, PNG (макс. 10MB)</p>
+                        <input type="file" id="file-input" accept="image/*">
+                        <button class="upload-button" id="upload-button">Выбрать файл</button>
+                    </div>
+                    
+                    <div class="preview-container" id="preview-container">
+                        <img id="image-preview" src="" alt="Предпросмотр скриншота">
+                        <button class="analyze-button" id="analyze-button">Проанализировать ставку</button>
+                    </div>
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Анализируем данные и делаем прогноз...</p>
+                </div>
+                
+                <div class="results-container" id="results-container">
+                    <div class="match-info">
+                        <div class="team">
+                            <div class="team-logo" id="home-logo">TM1</div>
+                            <h3 class="team-name" id="home-team">Команда 1</h3>
+                        </div>
+                        <div class="vs">VS</div>
+                        <div class="team">
+                            <div class="team-logo" id="away-logo">TM2</div>
+                            <h3 class="team-name" id="away-team">Команда 2</h3>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-result">
+                        <h3 class="prediction-title">Прогноз на матч</h3>
+                        <div class="prediction-details">
+                            <div class="prediction-item">
+                                <div class="prediction-value" id="home-win">0%</div>
+                                <div class="prediction-label">Победа первой команды</div>
+                            </div>
+                            <div class="prediction-item">
+                                <div class="prediction-value" id="draw">0%</div>
+                                <div class="prediction-label">Ничья</div>
+                            </div>
+                            <div class="prediction-item">
+                                <div class="prediction-value" id="away-win">0%</div>
+                                <div class="prediction-label">Победа второй команды</div>
+                            </div>
+                        </div>
+                        
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidence-fill"></div>
+                        </div>
+                        <div class="confidence-text">Точность анализа: <span id="confidence-value">0%</span></div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button class="new-signal-button" id="new-signal-button">Получить новый сигнал</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <div class="container">
+            <h2 class="section-title">Как это работает</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">⚽</div>
+                    <h3 class="feature-title">Выбор команд</h3>
+                    <p class="feature-description">Введите названия двух футбольных команд для анализа предстоящего матча</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Анализ статистики</h3>
+                    <p class="feature-description">Наша система анализирует текущую форму команд, предыдущие встречи и другие факторы</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Точный прогноз</h3>
+                    <p class="feature-description">Получите вероятностный прогноз исхода матча на основе AI-анализа</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">FootballAI</h3>
+                    <p>Используем передовые технологии AI для анализа футбольных матчей и прогнозирования их результатов.</p>
+                </div>
+                <div class="footer-section">
+                    <h3 class="footer-title">Быстрые ссылки</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">Главная</a></li>
+                        <li><a href="#analyze">Анализ матча</a></li>
+                        <li><a href="#features">Как это работает</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Звуковые эффекты -->
+    <audio id="click-sound" src="https://assets.mixkit.co/active_storage/sfx/247/247-preview.mp3" preload="auto"></audio>
+    <audio id="success-sound" src="https://assets.mixkit.co/active_storage/sfx/257/257-preview.mp3" preload="auto"></audio>
+    <audio id="error-sound" src="https://assets.mixkit.co/active_storage/sfx/250/250-preview.mp3" preload="auto"></audio>
+    
+    <!-- Фоновая музыка -->
+    <audio id="background-music" loop preload="auto">
+        <source src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Элементы DOM
+            const startButton = document.getElementById('start-button');
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            const team1Input = document.getElementById('team1-input');
+            const team2Input = document.getElementById('team2-input');
+            const next1Button = document.getElementById('next1');
+            const next2Button = document.getElementById('next2');
+            const error1 = document.getElementById('error1');
+            const error2 = document.getElementById('error2');
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            const uploadButton = document.getElementById('upload-button');
+            const previewContainer = document.getElementById('preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const analyzeButton = document.getElementById('analyze-button');
+            const loading = document.getElementById('loading');
+            const resultsContainer = document.getElementById('results-container');
+            const homeWin = document.getElementById('home-win');
+            const draw = document.getElementById('draw');
+            const awayWin = document.getElementById('away-win');
+            const confidenceFill = document.getElementById('confidence-fill');
+            const confidenceValue = document.getElementById('confidence-value');
+            const homeTeam = document.getElementById('home-team');
+            const awayTeam = document.getElementById('away-team');
+            const homeLogo = document.getElementById('home-logo');
+            const awayLogo = document.getElementById('away-logo');
+            const newSignalButton = document.getElementById('new-signal-button');
+            const predictionsCounter = document.getElementById('predictions-counter');
+            const predictionsLeft = document.getElementById('predictions-left');
+            const limitMessage = document.getElementById('limit-message');
+            const timeRemaining = document.getElementById('time-remaining');
+            
+            // Звуковые элементы
+            const clickSound = document.getElementById('click-sound');
+            const successSound = document.getElementById('success-sound');
+            const errorSound = document.getElementById('error-sound');
+            const backgroundMusic = document.getElementById('background-music');
+            
+            let currentStep = 1;
+            let team1 = '';
+            let team2 = '';
+            let currentImageData = null;
+            
+            // Система ограничения прогнозов
+            let predictionsRemaining = 10;
+            let resetTime = null;
+            
+            // Полная база данных футбольных команд (расширенная версия)
+            const footballTeams = [
+                // Англия
+                'Арсенал', 'Астон Вилла', 'Борнмут', 'Брайтон энд Хоув Альбион', 'Бернли',
+                'Брентфорд', 'Вест Хэм Юнайтед', 'Вулверхэмптон Уондерерс', 'Кристал Пэлас',
+                'Ливерпуль', 'Лутон Таун', 'Манчестер Сити', 'Манчестер Юнайтед', 'Ноттингем Форест',
+                'Ньюкасл Юнайтед', 'Тоттенхэм Хотспур', 'Фулхэм', 'Челси', 'Шеффилд Юнайтед', 'Эвертон',
+                'Лидс Юнайтед', 'Лестер Сити', 'Саутгемптон', 'Вест Бромвич Альбион', 'Блэкберн Роверс',
+                
+                // Испания
+                'Алавес', 'Атлетик Бильбао', 'Атлетико Мадрид', 'Барселона', 'Валенсия',
+                'Вильярреал', 'Гранада', 'Кадис', 'Лас-Пальмас', 'Мальорка',
+                'Осасуна', 'Райо Вальекано', 'Реал Бетис', 'Реал Мадрид', 'Реал Сосьедад',
+                'Севилья', 'Сельта', 'Хетафе', 'Альмерия', 'Эйбар', 'Хирона', 'Эспаньол', 'Вальядолид',
+                
+                // Италия
+                'Аталанта', 'Болонья', 'Верона', 'Дженоа', 'Интер',
+                'Кальяри', 'Лацио', 'Лечче', 'Милан', 'Монца',
+                'Наполи', 'Рома', 'Сассуоло', 'Салернитана', 'Торино',
+                'Удинезе', 'Фиорентина', 'Эмполи', 'Ювентус', 'Фрозиноне',
+                
+                // Германия
+                'Аугсбург', 'Бавария', 'Байер Леверкузен', 'Боруссия Дортмунд', 'Боруссия Мёнхенгладбах',
+                'Вердер', 'Вольфсбург', 'Дармштадт 98', 'Кёльн', 'Майнц 05',
+                'РБ Лейпциг', 'Унион Берлин', 'Хайденхайм', 'Айнтрахт Франкфурт', 'Хоффенхайм',
+                'Штутгарт', 'Фрайбург', 'Бохум', 'Гамбург', 'Шальке 04', 'Герта', 'Фортуна',
+                
+                // Франция
+                'Аяччо', 'Ланс', 'Лилль', 'Лион', 'Лорьян',
+                'Марсель', 'Мец', 'Монако', 'Монпелье', 'Нант',
+                'Ницца', 'ПСЖ', 'Реймс', 'Ренн', 'Страсбур',
+                'Тулуза', 'Клермон', 'Гавра', 'Брест',
+                
+                // Португалия
+                'Бенфика', 'Порту', 'Спортинг', 'Брага', 'Витория Гимарайнш',
+                'Боавишта', 'Фамаликан', 'Арока', 'Витория Сетубал', 'Риу Аве',
+                
+                // Нидерланды
+                'Аякс', 'ПСВ', 'Фейеноорд', 'АЗ', 'Твенте',
+                'Утрехт', 'Витесс', 'Херенвен',
+                
+                // Россия
+                'Зенит', 'Спартак', 'ЦСКА', 'Локомотив', 'Динамо',
+                'Краснодар', 'Ростов', 'Ахмат', 'Сочи', 'Оренбург',
+                'Урал', 'Пари Нижний Новгород', 'Факел', 'Балтика', 'Крылья Советов', 'Рубин',
+                
+                // Турция
+                'Галатасарай', 'Фенербахче', 'Бешикташ', 'Трабзонспор', 'Истанбул Башакшехир', 'Антальяспор',
+                
+                // Украина
+                'Динамо Киев', 'Шахтер Донецк', 'Днепр-1', 'Заря', 'Ворскла', 'Александрия',
+                
+                // Бельгия
+                'Андерлехт', 'Брюгге', 'Стандард Льеж', 'Гент',
+                
+                // Австрия
+                'Ред Булл Зальцбург', 'Рапид Вена', 'Аустрия Вена',
+                
+                // Шотландия
+                'Селтик', 'Рейнджерс', 'Абердин',
+                
+                // Дания
+                'Копенгаген', 'Мидтьюлланн',
+                
+                // Швейцария
+                'Базель', 'Янг Бойз',
+                
+                // Сербия
+                'Црвена Звезда', 'Партизан',
+                
+                // Греция
+                'Олимпиакос', 'Панатинаикос', 'АЕК Афины',
+                
+                // Хорватия
+                'Динамо Загреб',
+                
+                // Беларусь
+                'Шахтер Солигорск', 'Динамо Минск',
+                
+                // Бразилия
+                'Фламенго', 'Палмейрас', 'Сантос', 'Сан-Паулу', 'Коринтианс',
+                'Гремио', 'Интернасьонал', 'Атлетико Минейро', 'Крузейро', 'Ботафого',
+                'Флуминенсе', 'Васко да Гама', 'Баия', 'Форталеза', 'Атлетико Паранаэнсе',
+                'Брагантино', 'Сеара',
+                
+                // Аргентина
+                'Бока Хуниорс', 'Ривер Плейт', 'Индепендьенте', 'Расинг', 'Сан-Лоренсо',
+                'Велес Сарсфилд', 'Эстудиантес', 'Архентинос Хуниорс', 'Ньюэллс Олд Бойз',
+                'Росарио Сентраль', 'Уракан', 'Ланус',
+                
+                // Уругвай
+                'Насьональ', 'Пеньяроль',
+                
+                // Парагвай
+                'Олимпия', 'Серро Портеньо',
+                
+                // Перу
+                'Университарио', 'Альянса Лима',
+                
+                // Чили
+                'Коло-Коло', 'Универсидад де Чили',
+                
+                // Колумбия
+                'Америка де Кали', 'Атлетико Насьональ', 'Мильонариос',
+                
+                // Мексика
+                'Америка', 'Гвадалахара', 'Крус Асуль', 'УАНЛ Тигрес', 'Монтеррей',
+                
+                // Канада
+                'Торонто', 'Монреаль',
+                
+                // США
+                'Нью-Йорк Ред Буллз', 'Лос-Анджелес Гэлакси', 'Сиэтл Саундерс', 'Атланта Юнайтед', 'Д.C. Юнайтед',
+                
+                // Саудовская Аравия
+                'Аль-Хиляль', 'Аль-Наср', 'Аль-Ахли', 'Аль-Иттихад',
+                
+                // Иран
+                'Персеполис', 'Сепахан',
+                
+                // Южная Корея
+                'Ульсан Хёндэ', 'Чонбук Хёндэ', 'Соннам',
+                
+                // Китай
+                'Гуанчжоу Эвергранд', 'Шанхай СИПГ', 'Бэйцзин Гоань',
+                
+                // Япония
+                'Касима Антлерс', 'Урава Ред Даймондс', 'Иокогама Ф. Маринос',
+                
+                // Египет
+                'Аль-Ахли', 'Замалек',
+                
+                // Марокко
+                'Видад', 'Раджа',
+                
+                // ЮАР
+                'Мамелоди Сандаунз', 'Кайзер Чифс',
+                
+                // ДР Конго
+                'ТП Мазембе',
+                
+                // Тунис
+                'Этуаль дю Сахель', 'Эсперанс',
+                
+                // Австралия
+                'Сидней', 'Мельбурн Виктори', 'Уэстерн Сидней Уондерерс'
+            ];
+
+            // Загрузка состояния из localStorage
+            function loadState() {
+                const savedState = localStorage.getItem('footballAIState');
+                if (savedState) {
+                    const state = JSON.parse(savedState);
+                    predictionsRemaining = state.predictionsRemaining;
+                    resetTime = new Date(state.resetTime);
+                    
+                    // Проверяем, не истекло ли время сброса
+                    const now = new Date();
+                    if (now >= resetTime) {
+                        predictionsRemaining = 10;
+                        resetTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+                        saveState();
+                    }
+                } else {
+                    // Устанавливаем начальное состояние
+                    const now = new Date();
+                    resetTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+                    saveState();
+                }
+                
+                updatePredictionsCounter();
+            }
+            
+            // Сохранение состояния в localStorage
+            function saveState() {
+                const state = {
+                    predictionsRemaining: predictionsRemaining,
+                    resetTime: resetTime.toISOString()
+                };
+                localStorage.setItem('footballAIState', JSON.stringify(state));
+            }
+            
+            // Обновление счетчика прогнозов
+            function updatePredictionsCounter() {
+                predictionsLeft.textContent = predictionsRemaining;
+                
+                if (predictionsRemaining <= 0) {
+                    predictionsCounter.style.background = 'rgba(255, 82, 82, 0.1)';
+                    predictionsCounter.style.border = '1px solid rgba(255, 82, 82, 0.3)';
+                    limitMessage.style.display = 'block';
+                    updateTimer();
+                } else {
+                    predictionsCounter.style.background = 'rgba(0, 255, 136, 0.1)';
+                    predictionsCounter.style.border = '1px solid rgba(0, 255, 136, 0.3)';
+                    limitMessage.style.display = 'none';
+                }
+            }
+            
+            // Обновление таймера до сброса
+            function updateTimer() {
+                const now = new Date();
+                const diff = resetTime - now;
+                
+                if (diff <= 0) {
+                    predictionsRemaining = 10;
+                    resetTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+                    saveState();
+                    updatePredictionsCounter();
+                    return;
+                }
+                
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                timeRemaining.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                setTimeout(updateTimer, 1000);
+            }
+            
+            // Проверка доступности прогноза
+            function canMakePrediction() {
+                return predictionsRemaining > 0;
+            }
+            
+            // Использование прогноза
+            function usePrediction() {
+                if (predictionsRemaining > 0) {
+                    predictionsRemaining--;
+                    saveState();
+                    updatePredictionsCounter();
+                    return true;
+                }
+                return false;
+            }
+            
+            // Инициализация состояния
+            loadState();
+            
+            // Воспроизведение звука
+            function playSound(sound) {
+                sound.currentTime = 0;
+                sound.volume = 0.3; // Устанавливаем тихую громкость
+                sound.play().catch(e => console.log("Audio play failed:", e));
+            }
+            
+            // Включение фоновой музыки
+            function startBackgroundMusic() {
+                backgroundMusic.volume = 0.1; // Тихая фоновая музыка
+                backgroundMusic.play().catch(e => {
+                    console.log("Background music play failed:", e);
+                    // Автозапуск может быть заблокирован браузером, поэтому предлагаем пользователю запустить музыку
+                    document.addEventListener('click', function startMusicOnInteraction() {
+                        backgroundMusic.play().catch(e => console.log("Background music play failed after interaction:", e));
+                        document.removeEventListener('click', startMusicOnInteraction);
+                    }, { once: true });
+                });
+            }
+            
+            // Начало процесса
+            startButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                playSound(clickSound);
+                document.querySelector('#analyze').scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Переход к шагу 2
+            next1Button.addEventListener('click', function() {
+                playSound(clickSound);
+                team1 = team1Input.value.trim();
+                
+                if (isValidTeam(team1)) {
+                    error1.style.display = 'none';
+                    step1.classList.remove('active');
+                    step2.classList.add('active');
+                    currentStep = 2;
+                } else {
+                    error1.textContent = 'Впишите полное название команды или же другую команду';
+                    error1.style.display = 'block';
+                    playSound(errorSound);
+                }
+            });
+            
+            // Переход к шагу 3
+            next2Button.addEventListener('click', function() {
+                playSound(clickSound);
+                team2 = team2Input.value.trim();
+                
+                if (isValidTeam(team2) && team1 !== team2) {
+                    error2.style.display = 'none';
+                    step2.classList.remove('active');
+                    step3.classList.add('active');
+                    currentStep = 3;
+                    
+                    // Обновляем названия команд в предварительном просмотре
+                    homeTeam.textContent = team1;
+                    awayTeam.textContent = team2;
+                    homeLogo.textContent = getTeamAbbreviation(team1);
+                    awayLogo.textContent = getTeamAbbreviation(team2);
+                } else {
+                    if (team1 === team2) {
+                        error2.textContent = 'Выберите другую команду, отличную от первой';
+                    } else {
+                        error2.textContent = 'Впишите полное название команды или же другую команду';
+                    }
+                    error2.style.display = 'block';
+                    playSound(errorSound);
+                }
+            });
+            
+            // Проверка валидности команды (строгая проверка)
+            function isValidTeam(teamName) {
+                // Проверяем точное соответствие (с учетом регистра)
+                return footballTeams.some(team => team === teamName);
+            }
+            
+            // Получение аббревиатуры команды
+            function getTeamAbbreviation(teamName) {
+                // Простая логика для создания аббревиатуры
+                const words = teamName.split(' ');
+                if (words.length === 1) {
+                    return teamName.substring(0, 3).toUpperCase();
+                } else {
+                    return words.map(word => word[0]).join('').toUpperCase();
+                }
+            }
+            
+            // Обработчик клика по области загрузки
+            uploadArea.addEventListener('click', function() {
+                playSound(clickSound);
+                fileInput.click();
+            });
+            
+            // Обработчик клика по кнопке загрузки
+            uploadButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                playSound(clickSound);
+                fileInput.click();
+            });
+            
+            // Обработчик выбора файла
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    
+                    // Проверка типа файла
+                    if (!file.type.match('image.*')) {
+                        alert('Пожалуйста, выберите изображение!');
+                        playSound(errorSound);
+                        return;
+                    }
+                    
+                    // Проверка размера файла (максимум 10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('Размер файла не должен превышать 10MB!');
+                        playSound(errorSound);
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                        currentImageData = e.target.result;
+                    }
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Drag and drop функциональность
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    fileInput.files = e.dataTransfer.files;
+                    
+                    // Триггерим событие change
+                    const event = new Event('change');
+                    fileInput.dispatchEvent(event);
+                }
+            });
+            
+            // Обработчик анализа
+            analyzeButton.addEventListener('click', function() {
+                playSound(clickSound);
+                
+                if (!canMakePrediction()) {
+                    alert('Вы использовали все прогнозы за 24 часа. Пожалуйста, подождите.');
+                    playSound(errorSound);
+                    return;
+                }
+                
+                if (!imagePreview.src) {
+                    alert('Пожалуйста, сначала загрузите скриншот ставки!');
+                    playSound(errorSound);
+                    return;
+                }
+                
+                // Используем прогноз
+                usePrediction();
+                
+                // Показываем индикатор загрузки
+                loading.style.display = 'block';
+                step3.style.display = 'none';
+                
+                // Имитируем анализ (в реальном приложении здесь был бы запрос к серверу)
+                setTimeout(function() {
+                    // Скрываем индикатор загрузки
+                    loading.style.display = 'none';
+                    
+                    // Показываем результаты
+                    resultsContainer.style.display = 'block';
+                    
+                    // Генерируем прогноз на основе введенных данных
+                    const prediction = generatePrediction(team1, team2);
+                    
+                    // Анимируем отображение прогнозов
+                    animateValue(homeWin, 0, prediction.homeWin, 1500);
+                    animateValue(draw, 0, prediction.draw, 1500);
+                    animateValue(awayWin, 0, prediction.awayWin, 1500);
+                    
+                    // Анимируем полосу уверенности
+                    setTimeout(function() {
+                        confidenceFill.style.width = prediction.confidence + '%';
+                        animateValue(confidenceValue, 0, prediction.confidence, 1500);
+                    }, 1600);
+                    
+                    // Показываем кнопку для нового сигнала
+                    newSignalButton.style.display = 'inline-block';
+                    
+                    // Воспроизводим звук успеха
+                    playSound(successSound);
+                }, 3000);
+            });
+            
+            // Функция для генерации прогноза
+            function generatePrediction(team1, team2) {
+                // В реальном приложении здесь был бы сложный AI-алгоритм
+                // Для демонстрации используем псевдослучайные значения на основе названий команд
+                
+                // Создаем seed на основе названий команд
+                const seed = team1.length + team2.length;
+                const pseudoRandom = (min, max) => {
+                    return Math.floor(Math.random() * (max - min + 1)) + min;
+                };
+                
+                // Базовые вероятности
+                let homeWinChance = pseudoRandom(25, 45);
+                let drawChance = pseudoRandom(20, 35);
+                let awayWinChance = pseudoRandom(25, 45);
+                
+                // Корректируем на основе "силы" команд (простая эвристика)
+                const team1Strength = team1.length % 10;
+                const team2Strength = team2.length % 10;
+                
+                if (team1Strength > team2Strength) {
+                    homeWinChance += 10;
+                    awayWinChance -= 5;
+                } else if (team2Strength > team1Strength) {
+                    awayWinChance += 10;
+                    homeWinChance -= 5;
+                }
+                
+                // Нормализуем вероятности
+                const total = homeWinChance + drawChance + awayWinChance;
+                homeWinChance = Math.round((homeWinChance / total) * 100);
+                drawChance = Math.round((drawChance / total) * 100);
+                awayWinChance = 100 - homeWinChance - drawChance;
+                
+                // Определяем точность анализа
+                const confidence = pseudoRandom(75, 95);
+                
+                return {
+                    homeWin: homeWinChance,
+                    draw: drawChance,
+                    awayWin: awayWinChance,
+                    confidence
+                };
+            }
+            
+            // Кнопка для получения нового сигнала
+            newSignalButton.addEventListener('click', function() {
+                playSound(clickSound);
+                
+                // Сбрасываем все к начальному состоянию
+                team1Input.value = '';
+                team2Input.value = '';
+                imagePreview.src = '';
+                previewContainer.style.display = 'none';
+                resultsContainer.style.display = 'none';
+                newSignalButton.style.display = 'none';
+                
+                // Возвращаемся к первому шагу
+                step3.classList.remove('active');
+                step1.classList.add('active');
+                currentStep = 1;
+            });
+            
+            // Функция для анимации числовых значений
+            function animateValue(element, start, end, duration) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const value = Math.floor(progress * (end - start) + start);
+                    element.textContent = value + '%';
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+            
+            // Плавная прокрутка для навигационных ссылок
+            document.querySelectorAll('nav a, .cta-button').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    playSound(clickSound);
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId.startsWith('#')) {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Добавляем обработчики для всех кнопок для воспроизведения звука
+            document.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', function() {
+                    playSound(clickSound);
+                });
+            });
+            
+            // Запускаем фоновую музыку
+            startBackgroundMusic();
+        });
+    </script>
+</body>
+</html>
