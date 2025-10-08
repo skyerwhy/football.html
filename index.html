@@ -128,6 +128,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .logo {
@@ -175,6 +176,7 @@
             display: flex;
             list-style: none;
             gap: 30px;
+            flex-wrap: wrap;
         }
         
         nav a {
@@ -183,6 +185,7 @@
             font-weight: 500;
             transition: color 0.3s;
             position: relative;
+            white-space: nowrap;
         }
         
         nav a:hover {
@@ -892,9 +895,10 @@
             font-size: 16px;
         }
         
+        /* МОБИЛЬНЫЕ СТИЛИ */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 36px;
+            .container {
+                padding: 0 15px;
             }
             
             .header-content {
@@ -904,24 +908,132 @@
             
             nav ul {
                 gap: 15px;
+                justify-content: center;
+                width: 100%;
+            }
+            
+            nav li {
+                flex: 1;
+                text-align: center;
+            }
+            
+            .hero {
+                padding: 60px 0;
+            }
+            
+            .hero h1 {
+                font-size: 32px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+                padding: 0 10px;
+            }
+            
+            .section {
+                padding: 60px 0;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .input-container {
+                padding: 25px 20px;
+                border-radius: 15px;
+            }
+            
+            .step-title {
+                font-size: 20px;
+            }
+            
+            .team-input {
+                font-size: 16px;
+                padding: 12px 15px;
+            }
+            
+            .next-button, .analyze-button, .new-signal-button, .cta-button {
+                padding: 12px 25px;
+                font-size: 16px;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .upload-area {
+                padding: 40px 15px;
+            }
+            
+            .upload-icon {
+                font-size: 40px;
+            }
+            
+            .upload-text {
+                font-size: 16px;
+            }
+            
+            .upload-hint {
+                font-size: 12px;
             }
             
             .match-info {
                 flex-direction: column;
+                align-items: center;
             }
             
             .vs {
                 margin: 15px 0;
+                order: 1;
+            }
+            
+            .team {
+                min-width: 100%;
+            }
+            
+            .team-logo {
+                width: 80px;
+                height: 80px;
+                font-size: 30px;
+            }
+            
+            .team-name {
+                font-size: 18px;
+            }
+            
+            .prediction-result {
+                padding: 20px;
+            }
+            
+            .prediction-title {
+                font-size: 20px;
             }
             
             .prediction-main {
                 flex-direction: column;
+                gap: 15px;
+            }
+            
+            .prediction-main-item {
+                min-width: 100%;
+                padding: 15px;
+            }
+            
+            .prediction-main-value {
+                font-size: 24px;
+            }
+            
+            .prediction-main-label {
+                font-size: 14px;
             }
             
             .prediction-detail-item {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 8px;
+            }
+            
+            .prediction-detail-label {
+                font-size: 14px;
+                min-width: 140px;
             }
             
             .prediction-detail-bar {
@@ -931,6 +1043,68 @@
             
             .prediction-detail-value {
                 align-self: flex-end;
+                font-size: 14px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .feature-card {
+                padding: 20px;
+            }
+            
+            .feature-title {
+                font-size: 18px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .footer-section {
+                min-width: 100%;
+            }
+            
+            .predictions-counter {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-text {
+                font-size: 20px;
+            }
+            
+            .hero h1 {
+                font-size: 26px;
+            }
+            
+            .hero p {
+                font-size: 16px;
+            }
+            
+            .section-title {
+                font-size: 24px;
+            }
+            
+            .step-title {
+                font-size: 18px;
+            }
+            
+            .team-input {
+                font-size: 14px;
+            }
+            
+            .prediction-main-value {
+                font-size: 22px;
+            }
+            
+            .prediction-detail-label {
+                font-size: 13px;
             }
         }
     </style>
