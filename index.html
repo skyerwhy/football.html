@@ -811,6 +811,87 @@
             text-align: center;
         }
         
+        /* Новые стили для нового формата прогноза */
+        .prediction-main {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .prediction-main-item {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        
+        .prediction-main-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .prediction-main-label {
+            color: var(--light);
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .prediction-details-new {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .prediction-detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .prediction-detail-label {
+            flex: 1;
+            color: var(--light);
+            font-size: 16px;
+        }
+        
+        .prediction-detail-bar {
+            flex: 2;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 0 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .prediction-detail-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), #00cc78);
+            border-radius: 5px;
+            width: 0;
+            transition: width 1.5s ease-in-out;
+            box-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+        }
+        
+        .prediction-detail-value {
+            flex: 0 0 50px;
+            text-align: right;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 36px;
@@ -831,6 +912,25 @@
             
             .vs {
                 margin: 15px 0;
+            }
+            
+            .prediction-main {
+                flex-direction: column;
+            }
+            
+            .prediction-detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .prediction-detail-bar {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .prediction-detail-value {
+                align-self: flex-end;
             }
         }
     </style>
@@ -934,25 +1034,49 @@
                     
                     <div class="prediction-result">
                         <h3 class="prediction-title">Прогноз на матч</h3>
-                        <div class="prediction-details">
-                            <div class="prediction-item">
-                                <div class="prediction-value" id="home-win">0%</div>
-                                <div class="prediction-label">Победа первой команды</div>
+                        
+                        <!-- Новый формат прогноза -->
+                        <div class="prediction-main">
+                            <div class="prediction-main-item">
+                                <div class="prediction-main-value" id="accuracy-value">0%</div>
+                                <div class="prediction-main-label">ТОЧНОСТЬ АНАЛИЗА</div>
                             </div>
-                            <div class="prediction-item">
-                                <div class="prediction-value" id="draw">0%</div>
-                                <div class="prediction-label">Ничья</div>
-                            </div>
-                            <div class="prediction-item">
-                                <div class="prediction-value" id="away-win">0%</div>
-                                <div class="prediction-label">Победа второй команды</div>
+                            <div class="prediction-main-item">
+                                <div class="prediction-main-value" id="signal-value">-</div>
+                                <div class="prediction-main-label">НАДЁЖНЫЙ СИГНАЛ</div>
                             </div>
                         </div>
                         
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" id="confidence-fill"></div>
+                        <div class="prediction-details-new">
+                            <div class="prediction-detail-item">
+                                <div class="prediction-detail-label">Тотал больше 2.5</div>
+                                <div class="prediction-detail-bar">
+                                    <div class="prediction-detail-fill" id="total-over-fill"></div>
+                                </div>
+                                <div class="prediction-detail-value" id="total-over-value">0%</div>
+                            </div>
+                            <div class="prediction-detail-item">
+                                <div class="prediction-detail-label">Тотал меньше 2.5</div>
+                                <div class="prediction-detail-bar">
+                                    <div class="prediction-detail-fill" id="total-under-fill"></div>
+                                </div>
+                                <div class="prediction-detail-value" id="total-under-value">0%</div>
+                            </div>
+                            <div class="prediction-detail-item">
+                                <div class="prediction-detail-label">Тотал меньше 3.5</div>
+                                <div class="prediction-detail-bar">
+                                    <div class="prediction-detail-fill" id="total-under35-fill"></div>
+                                </div>
+                                <div class="prediction-detail-value" id="total-under35-value">0%</div>
+                            </div>
+                            <div class="prediction-detail-item">
+                                <div class="prediction-detail-label">Обе забьют: да</div>
+                                <div class="prediction-detail-bar">
+                                    <div class="prediction-detail-fill" id="both-score-fill"></div>
+                                </div>
+                                <div class="prediction-detail-value" id="both-score-value">0%</div>
+                            </div>
                         </div>
-                        <div class="confidence-text">Точность анализа: <span id="confidence-value">0%</span></div>
                     </div>
                     
                     <div style="text-align: center;">
@@ -1047,11 +1171,6 @@
             const analyzeButton = document.getElementById('analyze-button');
             const loading = document.getElementById('loading');
             const resultsContainer = document.getElementById('results-container');
-            const homeWin = document.getElementById('home-win');
-            const draw = document.getElementById('draw');
-            const awayWin = document.getElementById('away-win');
-            const confidenceFill = document.getElementById('confidence-fill');
-            const confidenceValue = document.getElementById('confidence-value');
             const homeTeam = document.getElementById('home-team');
             const awayTeam = document.getElementById('away-team');
             const homeLogo = document.getElementById('home-logo');
@@ -1061,6 +1180,18 @@
             const predictionsLeft = document.getElementById('predictions-left');
             const limitMessage = document.getElementById('limit-message');
             const timeRemaining = document.getElementById('time-remaining');
+            
+            // Новые элементы для прогноза
+            const accuracyValue = document.getElementById('accuracy-value');
+            const signalValue = document.getElementById('signal-value');
+            const totalOverValue = document.getElementById('total-over-value');
+            const totalUnderValue = document.getElementById('total-under-value');
+            const totalUnder35Value = document.getElementById('total-under35-value');
+            const bothScoreValue = document.getElementById('both-score-value');
+            const totalOverFill = document.getElementById('total-over-fill');
+            const totalUnderFill = document.getElementById('total-under-fill');
+            const totalUnder35Fill = document.getElementById('total-under35-fill');
+            const bothScoreFill = document.getElementById('both-score-fill');
             
             // Звуковые элементы
             const clickSound = document.getElementById('click-sound');
@@ -1505,19 +1636,8 @@
                     // Показываем результаты
                     resultsContainer.style.display = 'block';
                     
-                    // Генерируем прогноз на основе введенных данных
-                    const prediction = generatePrediction(team1, team2);
-                    
-                    // Анимируем отображение прогнозов
-                    animateValue(homeWin, 0, prediction.homeWin, 1500);
-                    animateValue(draw, 0, prediction.draw, 1500);
-                    animateValue(awayWin, 0, prediction.awayWin, 1500);
-                    
-                    // Анимируем полосу уверенности
-                    setTimeout(function() {
-                        confidenceFill.style.width = prediction.confidence + '%';
-                        animateValue(confidenceValue, 0, prediction.confidence, 1500);
-                    }, 1600);
+                    // Генерируем новый формат прогноза
+                    generateNewPrediction();
                     
                     // Показываем кнопку для нового сигнала
                     newSignalButton.style.display = 'inline-block';
@@ -1527,49 +1647,47 @@
                 }, 3000);
             });
             
-            // Функция для генерации прогноза
-            function generatePrediction(team1, team2) {
-                // В реальном приложении здесь был бы сложный AI-алгоритм
-                // Для демонстрации используем псевдослучайные значения на основе названий команд
+            // Функция для генерации нового формата прогноза
+            function generateNewPrediction() {
+                // Генерируем случайные значения в заданных диапазонах
+                const accuracy = Math.floor(Math.random() * (94 - 75 + 1)) + 75;
+                const totalOver = Math.floor(Math.random() * (83 - 67 + 1)) + 67;
+                const totalUnder = Math.floor(Math.random() * (77 - 65 + 1)) + 65;
+                const totalUnder35 = Math.floor(Math.random() * (69 - 57 + 1)) + 57;
+                const bothScore = Math.floor(Math.random() * (88 - 57 + 1)) + 57;
                 
-                // Создаем seed на основе названий команд
-                const seed = team1.length + team2.length;
-                const pseudoRandom = (min, max) => {
-                    return Math.floor(Math.random() * (max - min + 1)) + min;
-                };
+                // Определяем надежный сигнал (самый высокий процент)
+                const signals = [
+                    {name: "Тотал больше 2.5", value: totalOver},
+                    {name: "Тотал меньше 2.5", value: totalUnder},
+                    {name: "Тотал меньше 3.5", value: totalUnder35},
+                    {name: "Обе забьют: да", value: bothScore}
+                ];
                 
-                // Базовые вероятности
-                let homeWinChance = pseudoRandom(25, 45);
-                let drawChance = pseudoRandom(20, 35);
-                let awayWinChance = pseudoRandom(25, 45);
+                // Находим сигнал с наибольшим процентом
+                const reliableSignal = signals.reduce((max, signal) => 
+                    signal.value > max.value ? signal : max
+                );
                 
-                // Корректируем на основе "силы" команд (простая эвристика)
-                const team1Strength = team1.length % 10;
-                const team2Strength = team2.length % 10;
+                // Устанавливаем значения
+                animateValue(accuracyValue, 0, accuracy, 1500);
+                signalValue.textContent = reliableSignal.name;
                 
-                if (team1Strength > team2Strength) {
-                    homeWinChance += 10;
-                    awayWinChance -= 5;
-                } else if (team2Strength > team1Strength) {
-                    awayWinChance += 10;
-                    homeWinChance -= 5;
-                }
-                
-                // Нормализуем вероятности
-                const total = homeWinChance + drawChance + awayWinChance;
-                homeWinChance = Math.round((homeWinChance / total) * 100);
-                drawChance = Math.round((drawChance / total) * 100);
-                awayWinChance = 100 - homeWinChance - drawChance;
-                
-                // Определяем точность анализа
-                const confidence = pseudoRandom(75, 95);
-                
-                return {
-                    homeWin: homeWinChance,
-                    draw: drawChance,
-                    awayWin: awayWinChance,
-                    confidence
-                };
+                // Анимируем значения и полосы прогресса
+                setTimeout(function() {
+                    animateValue(totalOverValue, 0, totalOver, 1500);
+                    animateValue(totalUnderValue, 0, totalUnder, 1500);
+                    animateValue(totalUnder35Value, 0, totalUnder35, 1500);
+                    animateValue(bothScoreValue, 0, bothScore, 1500);
+                    
+                    // Анимируем полосы прогресса
+                    setTimeout(function() {
+                        totalOverFill.style.width = totalOver + '%';
+                        totalUnderFill.style.width = totalUnder + '%';
+                        totalUnder35Fill.style.width = totalUnder35 + '%';
+                        bothScoreFill.style.width = bothScore + '%';
+                    }, 1600);
+                }, 500);
             }
             
             // Кнопка для получения нового сигнала
@@ -1583,6 +1701,12 @@
                 previewContainer.style.display = 'none';
                 resultsContainer.style.display = 'none';
                 newSignalButton.style.display = 'none';
+                
+                // Сбрасываем полосы прогресса
+                totalOverFill.style.width = '0%';
+                totalUnderFill.style.width = '0%';
+                totalUnder35Fill.style.width = '0%';
+                bothScoreFill.style.width = '0%';
                 
                 // Возвращаемся к первому шагу
                 step3.classList.remove('active');
