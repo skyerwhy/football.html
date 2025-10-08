@@ -895,6 +895,68 @@
             font-size: 16px;
         }
         
+        /* Новые стили для улучшенной загрузки */
+        .loading-text {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .loading-item {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s, transform 0.5s;
+            font-size: 18px;
+            color: var(--light);
+        }
+        
+        .loading-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .loading-item.completed {
+            color: var(--accent);
+        }
+        
+        .get-signal-button {
+            background: linear-gradient(135deg, var(--accent), #00cc78);
+            color: var(--dark);
+            border: none;
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .get-signal-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.6);
+        }
+        
+        .get-signal-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+        
+        .get-signal-button:hover::before {
+            left: 100%;
+        }
+        
         /* МОБИЛЬНЫЕ СТИЛИ */
         @media (max-width: 768px) {
             .container {
@@ -952,7 +1014,7 @@
                 padding: 12px 15px;
             }
             
-            .next-button, .analyze-button, .new-signal-button, .cta-button {
+            .next-button, .analyze-button, .new-signal-button, .cta-button, .get-signal-button {
                 padding: 12px 25px;
                 font-size: 16px;
                 width: 100%;
@@ -1072,6 +1134,10 @@
                 padding: 8px 15px;
                 font-size: 14px;
             }
+            
+            .loading-item {
+                font-size: 16px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1105,6 +1171,10 @@
             
             .prediction-detail-label {
                 font-size: 13px;
+            }
+            
+            .loading-item {
+                font-size: 14px;
             }
         }
     </style>
@@ -1150,7 +1220,7 @@
             <div class="input-container">
                 <div class="limit-message" id="limit-message">
                     <h3>Лимит прогнозов исчерпан</h3>
-                    <p>Вы использовали все 10 прогнозов за 24 часа. Следующий прогноз будет доступен через: <span id="time-remaining">24:00:00</span></p>
+                    <p>Вы использовали все 5 прогнозов. Больше прогнозов не доступно.</p>
                 </div>
                 
                 <!-- Шаг 1: Ввод первой команды -->
@@ -1190,7 +1260,12 @@
                 
                 <div class="loading" id="loading">
                     <div class="spinner"></div>
-                    <p>Анализируем данные и делаем прогноз...</p>
+                    <div class="loading-text" id="loading-text">
+                        <div class="loading-item" id="loading-item-1">Анализ вашего матча...</div>
+                        <div class="loading-item" id="loading-item-2">Оценка вероятностей и рисков...</div>
+                        <div class="loading-item" id="loading-item-3">Генерация оптимального варианта...</div>
+                    </div>
+                    <button class="get-signal-button" id="get-signal-button">Получить сигнал</button>
                 </div>
                 
                 <div class="results-container" id="results-container">
@@ -1259,7 +1334,7 @@
                     
                     <!-- Счетчик прогнозов теперь под результатами -->
                     <div class="predictions-counter" id="predictions-counter">
-                        Осталось прогнозов: <span id="predictions-left">10</span>/10
+                        Осталось прогнозов: <span id="predictions-left">5</span>/5
                     </div>
                 </div>
             </div>
@@ -1344,6 +1419,11 @@
             const imagePreview = document.getElementById('image-preview');
             const analyzeButton = document.getElementById('analyze-button');
             const loading = document.getElementById('loading');
+            const loadingText = document.getElementById('loading-text');
+            const loadingItem1 = document.getElementById('loading-item-1');
+            const loadingItem2 = document.getElementById('loading-item-2');
+            const loadingItem3 = document.getElementById('loading-item-3');
+            const getSignalButton = document.getElementById('get-signal-button');
             const resultsContainer = document.getElementById('results-container');
             const homeTeam = document.getElementById('home-team');
             const awayTeam = document.getElementById('away-team');
@@ -1353,7 +1433,6 @@
             const predictionsCounter = document.getElementById('predictions-counter');
             const predictionsLeft = document.getElementById('predictions-left');
             const limitMessage = document.getElementById('limit-message');
-            const timeRemaining = document.getElementById('time-remaining');
             
             // Новые элементы для прогноза
             const accuracyValue = document.getElementById('accuracy-value');
@@ -1378,9 +1457,8 @@
             let team2 = '';
             let currentImageData = null;
             
-            // Система ограничения прогнозов
-            let predictionsRemaining = 10;
-            let resetTime = null;
+            // Система ограничения прогнозов - теперь 5 попыток навсегда
+            let predictionsRemaining = 5;
             
             // Полная база данных футбольных команд
             const footballTeams = [
@@ -1536,19 +1614,8 @@
                 if (savedState) {
                     const state = JSON.parse(savedState);
                     predictionsRemaining = state.predictionsRemaining;
-                    resetTime = new Date(state.resetTime);
-                    
-                    // Проверяем, не истекло ли время сброса
-                    const now = new Date();
-                    if (now >= resetTime) {
-                        predictionsRemaining = 10;
-                        resetTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-                        saveState();
-                    }
                 } else {
                     // Устанавливаем начальное состояние
-                    const now = new Date();
-                    resetTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
                     saveState();
                 }
                 
@@ -1558,8 +1625,7 @@
             // Сохранение состояния в localStorage
             function saveState() {
                 const state = {
-                    predictionsRemaining: predictionsRemaining,
-                    resetTime: resetTime.toISOString()
+                    predictionsRemaining: predictionsRemaining
                 };
                 localStorage.setItem('footballAIState', JSON.stringify(state));
             }
@@ -1572,34 +1638,11 @@
                     predictionsCounter.style.background = 'rgba(255, 82, 82, 0.1)';
                     predictionsCounter.style.border = '1px solid rgba(255, 82, 82, 0.3)';
                     limitMessage.style.display = 'block';
-                    updateTimer();
                 } else {
                     predictionsCounter.style.background = 'rgba(0, 255, 136, 0.1)';
                     predictionsCounter.style.border = '1px solid rgba(0, 255, 136, 0.3)';
                     limitMessage.style.display = 'none';
                 }
-            }
-            
-            // Обновление таймера до сброса
-            function updateTimer() {
-                const now = new Date();
-                const diff = resetTime - now;
-                
-                if (diff <= 0) {
-                    predictionsRemaining = 10;
-                    resetTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-                    saveState();
-                    updatePredictionsCounter();
-                    return;
-                }
-                
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                
-                timeRemaining.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                setTimeout(updateTimer, 1000);
             }
             
             // Проверка доступности прогноза
@@ -1624,16 +1667,15 @@
             // Воспроизведение звука
             function playSound(sound) {
                 sound.currentTime = 0;
-                sound.volume = 0.5; // Увеличил громкость для лучшей слышимости
+                sound.volume = 0.5;
                 sound.play().catch(e => console.log("Audio play failed:", e));
             }
             
             // Включение фоновой музыки
             function startBackgroundMusic() {
-                backgroundMusic.volume = 0.3; // Увеличил громкость фоновой музыки
+                backgroundMusic.volume = 0.3;
                 backgroundMusic.play().catch(e => {
                     console.log("Background music play failed:", e);
-                    // Автозапуск может быть заблокирован браузером, поэтому предлагаем пользователю запустить музыку
                     document.addEventListener('click', function startMusicOnInteraction() {
                         backgroundMusic.play().catch(e => console.log("Background music play failed after interaction:", e));
                         document.removeEventListener('click', startMusicOnInteraction);
@@ -1781,7 +1823,7 @@
                 playSound(clickSound);
                 
                 if (!canMakePrediction()) {
-                    alert('Вы использовали все прогнозы за 24 часа. Пожалуйста, подождите.');
+                    alert('Вы использовали все 5 прогнозов. Больше прогнозов не доступно.');
                     playSound(errorSound);
                     return;
                 }
@@ -1802,23 +1844,60 @@
                 // Прокручиваем страницу к началу плашки с прогнозом
                 document.querySelector('#analyze').scrollIntoView({ behavior: 'smooth' });
                 
-                // Имитируем анализ (в реальном приложении здесь был бы запрос к серверу)
+                // Запускаем анимацию загрузки
+                startLoadingAnimation();
+            });
+            
+            // Функция для анимации загрузки
+            function startLoadingAnimation() {
+                // Сбрасываем состояние
+                loadingItem1.classList.remove('active', 'completed');
+                loadingItem2.classList.remove('active', 'completed');
+                loadingItem3.classList.remove('active', 'completed');
+                getSignalButton.style.display = 'none';
+                
+                // Показываем первый элемент
                 setTimeout(function() {
-                    // Скрываем индикатор загрузки
-                    loading.style.display = 'none';
-                    
-                    // Показываем результаты
-                    resultsContainer.style.display = 'block';
-                    
-                    // Генерируем новый формат прогноза
-                    generateNewPrediction();
-                    
-                    // Показываем кнопку для нового сигнала
-                    newSignalButton.style.display = 'inline-block';
-                    
-                    // Воспроизводим звук успеха
-                    playSound(successSound);
-                }, 3000);
+                    loadingItem1.classList.add('active');
+                }, 500);
+                
+                // Показываем второй элемент
+                setTimeout(function() {
+                    loadingItem1.classList.add('completed');
+                    loadingItem2.classList.add('active');
+                }, 2000);
+                
+                // Показываем третий элемент
+                setTimeout(function() {
+                    loadingItem2.classList.add('completed');
+                    loadingItem3.classList.add('active');
+                }, 3500);
+                
+                // Показываем кнопку получения сигнала
+                setTimeout(function() {
+                    loadingItem3.classList.add('completed');
+                    getSignalButton.style.display = 'inline-block';
+                }, 5000);
+            }
+            
+            // Обработчик кнопки получения сигнала
+            getSignalButton.addEventListener('click', function() {
+                playSound(clickSound);
+                
+                // Скрываем индикатор загрузки
+                loading.style.display = 'none';
+                
+                // Показываем результаты
+                resultsContainer.style.display = 'block';
+                
+                // Генерируем новый формат прогноза
+                generateNewPrediction();
+                
+                // Показываем кнопку для нового сигнала
+                newSignalButton.style.display = 'inline-block';
+                
+                // Воспроизводим звук успеха
+                playSound(successSound);
             });
             
             // Функция для генерации нового формата прогноза
