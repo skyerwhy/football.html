@@ -239,7 +239,7 @@
             background: rgba(0, 255, 136, 0.1);
             border-radius: 10px;
             padding: 10px 20px;
-            margin-bottom: 20px;
+            margin-top: 30px;
             display: inline-block;
             border: 1px solid rgba(0, 255, 136, 0.3);
         }
@@ -866,9 +866,6 @@
         <div class="container">
             <h1>AI-прогнозы на футбольные матчи</h1>
             <p>Получите точный прогноз на основе анализа AI и статистики команд</p>
-            <div class="predictions-counter" id="predictions-counter">
-                Осталось прогнозов: <span id="predictions-left">10</span>/10
-            </div>
             <a href="#analyze" class="cta-button" id="start-button">Попробовать сейчас</a>
         </div>
     </section>
@@ -961,6 +958,11 @@
                     <div style="text-align: center;">
                         <button class="new-signal-button" id="new-signal-button">Получить новый сигнал</button>
                     </div>
+                    
+                    <!-- Счетчик прогнозов теперь под результатами -->
+                    <div class="predictions-counter" id="predictions-counter">
+                        Осталось прогнозов: <span id="predictions-left">10</span>/10
+                    </div>
                 </div>
             </div>
         </div>
@@ -1009,9 +1011,15 @@
     </footer>
 
     <!-- Звуковые эффекты -->
-    <audio id="click-sound" src="https://assets.mixkit.co/active_storage/sfx/247/247-preview.mp3" preload="auto"></audio>
-    <audio id="success-sound" src="https://assets.mixkit.co/active_storage/sfx/257/257-preview.mp3" preload="auto"></audio>
-    <audio id="error-sound" src="https://assets.mixkit.co/active_storage/sfx/250/250-preview.mp3" preload="auto"></audio>
+    <audio id="click-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/247/247-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="success-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/257/257-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="error-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/250/250-preview.mp3" type="audio/mpeg">
+    </audio>
     
     <!-- Фоновая музыка -->
     <audio id="background-music" loop preload="auto">
@@ -1069,7 +1077,7 @@
             let predictionsRemaining = 10;
             let resetTime = null;
             
-            // Полная база данных футбольных команд (расширенная версия)
+            // Полная база данных футбольных команд
             const footballTeams = [
                 // Англия
                 'Арсенал', 'Астон Вилла', 'Борнмут', 'Брайтон энд Хоув Альбион', 'Бернли',
@@ -1311,13 +1319,13 @@
             // Воспроизведение звука
             function playSound(sound) {
                 sound.currentTime = 0;
-                sound.volume = 0.3; // Устанавливаем тихую громкость
+                sound.volume = 0.5; // Увеличил громкость для лучшей слышимости
                 sound.play().catch(e => console.log("Audio play failed:", e));
             }
             
             // Включение фоновой музыки
             function startBackgroundMusic() {
-                backgroundMusic.volume = 0.1; // Тихая фоновая музыка
+                backgroundMusic.volume = 0.3; // Увеличил громкость фоновой музыки
                 backgroundMusic.play().catch(e => {
                     console.log("Background music play failed:", e);
                     // Автозапуск может быть заблокирован браузером, поэтому предлагаем пользователю запустить музыку
@@ -1485,6 +1493,9 @@
                 // Показываем индикатор загрузки
                 loading.style.display = 'block';
                 step3.style.display = 'none';
+                
+                // Прокручиваем страницу к началу плашки с прогнозом
+                document.querySelector('#analyze').scrollIntoView({ behavior: 'smooth' });
                 
                 // Имитируем анализ (в реальном приложении здесь был бы запрос к серверу)
                 setTimeout(function() {
