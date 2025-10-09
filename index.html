@@ -957,6 +957,47 @@
             left: 100%;
         }
         
+        /* Стили для инструкции */
+        .instructions {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        
+        .instructions h2 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .instructions h3 {
+            color: var(--light);
+            margin: 25px 0 15px 0;
+        }
+        
+        .instructions ul, .instructions ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .instructions-section {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        
         /* МОБИЛЬНЫЕ СТИЛИ */
         @media (max-width: 768px) {
             .container {
@@ -1087,25 +1128,34 @@
                 font-size: 14px;
             }
             
+            /* Улучшенные стили для мобильных устройств */
             .prediction-detail-item {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 8px;
+                padding: 12px 0;
             }
             
             .prediction-detail-label {
-                font-size: 14px;
+                font-size: 13px;
                 min-width: 140px;
+                margin-bottom: 5px;
             }
             
             .prediction-detail-bar {
                 width: 100%;
                 margin: 0;
+                height: 8px;
             }
             
             .prediction-detail-value {
                 align-self: flex-end;
                 font-size: 14px;
+                margin-top: 5px;
+            }
+            
+            .prediction-details-new {
+                gap: 12px;
             }
             
             .features {
@@ -1137,6 +1187,18 @@
             
             .loading-item {
                 font-size: 16px;
+            }
+            
+            .instructions {
+                padding: 25px 20px;
+            }
+            
+            .instructions h2 {
+                font-size: 24px;
+            }
+            
+            .instructions h3 {
+                font-size: 18px;
             }
         }
         
@@ -1170,11 +1232,32 @@
             }
             
             .prediction-detail-label {
+                font-size: 12px;
+            }
+            
+            .prediction-detail-value {
                 font-size: 13px;
             }
             
             .loading-item {
                 font-size: 14px;
+            }
+            
+            /* Еще более компактные стили для очень маленьких экранов */
+            .prediction-detail-item {
+                padding: 10px 0;
+            }
+            
+            .prediction-detail-label {
+                font-size: 11px;
+            }
+            
+            .prediction-detail-bar {
+                height: 6px;
+            }
+            
+            .prediction-detail-value {
+                font-size: 12px;
             }
         }
     </style>
@@ -1199,6 +1282,7 @@
                     <ul>
                         <li><a href="#home">Главная</a></li>
                         <li><a href="#analyze">Анализ матча</a></li>
+                        <li><a href="#instructions">Инструкция</a></li>
                         <li><a href="#features">Возможности</a></li>
                     </ul>
                 </nav>
@@ -1220,7 +1304,7 @@
             <div class="input-container">
                 <div class="limit-message" id="limit-message">
                     <h3>Лимит прогнозов исчерпан</h3>
-                    <p>Вы использовали все 5 прогнозов. Больше прогнозов не доступно.</p>
+                    <p>Вы использовали все 5 прогнозов. Следующие прогнозы будут доступны через: <span id="timer-display">24:00:00</span></p>
                 </div>
                 
                 <!-- Шаг 1: Ввод первой команды -->
@@ -1341,6 +1425,65 @@
         </div>
     </section>
 
+    <section class="section" id="instructions">
+        <div class="container">
+            <h2 class="section-title">Инструкция</h2>
+            <div class="instructions">
+                <h2>Краткая инструкция по использованию FootballAI</h2>
+
+                <div class="instructions-section">
+                    <h3>🚀 Быстрый старт</h3>
+                    <ol>
+                        <li>Нажмите "Попробовать сейчас" на главной странице</li>
+                        <li>Введите команды:
+                            <ul>
+                                <li>Полные названия двух команд</li>
+                                <li>Используйте заглавные буквы</li>
+                                <li>Нажимайте "Далее" после каждого шага</li>
+                            </ul>
+                        </li>
+                        <li>Загрузите скриншот ставки с букмекерского сайта</li>
+                        <li>Нажмите "Проанализировать ставку" и дождитесь результата</li>
+                        <li>Получите AI-прогноз с вероятностями разных исходов</li>
+                    </ol>
+                </div>
+
+                <div class="instructions-section">
+                    <h3>⚡️ Важные правила</h3>
+                    <h4>🔄 Система ограничений:</h4>
+                    <ul>
+                        <li>5 прогнозов каждые 24 часа</li>
+                        <li>Таймер запускается при первом использовании</li>
+                        <li>Автоматический сброс через 24 часа</li>
+                        <li>Состояние сохраняется в браузере</li>
+                    </ul>
+
+                    <h4>🛠 Технические моменты:</h4>
+                    <ul>
+                        <li>Если сайт завис → обновите страницу (F5 или Ctrl+R)</li>
+                        <li>Поддерживаются JPG/PNG до 10MB</li>
+                        <li>Работает на всех устройствах</li>
+                        <li>Рекомендуем включить звук</li>
+                    </ul>
+                </div>
+
+                <div class="instructions-section">
+                    <h3>💡 Советы</h3>
+                    <ul>
+                        <li>Используйте полные названия команд</li>
+                        <li>Загружайте четкие скриншоты</li>
+                        <li>Следите за счетчиком прогнозов</li>
+                        <li>При проблемах — обновите страницу</li>
+                    </ul>
+                </div>
+
+                <p style="text-align: center; margin-top: 30px; font-weight: bold;">
+                    Готовы к точным прогнозам? Начинайте прямо сейчас! ⚽️🎯
+                </p>
+            </div>
+        </div>
+    </section>
+
     <section class="section" id="features">
         <div class="container">
             <h2 class="section-title">Как это работает</h2>
@@ -1376,6 +1519,7 @@
                     <ul class="footer-links">
                         <li><a href="#home">Главная</a></li>
                         <li><a href="#analyze">Анализ матча</a></li>
+                        <li><a href="#instructions">Инструкция</a></li>
                         <li><a href="#features">Как это работает</a></li>
                     </ul>
                 </div>
@@ -1392,6 +1536,9 @@
     </audio>
     <audio id="error-sound" preload="auto">
         <source src="https://assets.mixkit.co/active_storage/sfx/250/250-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="transition-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/249/249-preview.mp3" type="audio/mpeg">
     </audio>
     
     <!-- Фоновая музыка -->
@@ -1433,6 +1580,7 @@
             const predictionsCounter = document.getElementById('predictions-counter');
             const predictionsLeft = document.getElementById('predictions-left');
             const limitMessage = document.getElementById('limit-message');
+            const timerDisplay = document.getElementById('timer-display');
             
             // Новые элементы для прогноза
             const accuracyValue = document.getElementById('accuracy-value');
@@ -1450,15 +1598,19 @@
             const clickSound = document.getElementById('click-sound');
             const successSound = document.getElementById('success-sound');
             const errorSound = document.getElementById('error-sound');
+            const transitionSound = document.getElementById('transition-sound');
             const backgroundMusic = document.getElementById('background-music');
             
             let currentStep = 1;
             let team1 = '';
             let team2 = '';
             let currentImageData = null;
+            let timerInterval = null;
             
-            // Система ограничения прогнозов - теперь 5 попыток навсегда
+            // Система ограничения прогнозов - 5 попыток каждые 24 часа
             let predictionsRemaining = 5;
+            let lastPredictionTime = null;
+            let resetTime = null;
             
             // Полная база данных футбольных команд
             const footballTeams = [
@@ -1614,8 +1766,23 @@
                 if (savedState) {
                     const state = JSON.parse(savedState);
                     predictionsRemaining = state.predictionsRemaining;
+                    lastPredictionTime = state.lastPredictionTime ? new Date(state.lastPredictionTime) : null;
+                    resetTime = state.resetTime ? new Date(state.resetTime) : null;
+                    
+                    // Проверяем, не прошло ли 24 часа с момента последнего использования
+                    if (resetTime && new Date() >= resetTime) {
+                        // Сбрасываем счетчик
+                        predictionsRemaining = 5;
+                        lastPredictionTime = null;
+                        resetTime = null;
+                        saveState();
+                    } else if (predictionsRemaining <= 0) {
+                        // Если лимит исчерпан, запускаем таймер
+                        startTimer();
+                    }
                 } else {
                     // Устанавливаем начальное состояние
+                    predictionsRemaining = 5;
                     saveState();
                 }
                 
@@ -1625,7 +1792,9 @@
             // Сохранение состояния в localStorage
             function saveState() {
                 const state = {
-                    predictionsRemaining: predictionsRemaining
+                    predictionsRemaining: predictionsRemaining,
+                    lastPredictionTime: lastPredictionTime,
+                    resetTime: resetTime
                 };
                 localStorage.setItem('footballAIState', JSON.stringify(state));
             }
@@ -1654,11 +1823,49 @@
             function usePrediction() {
                 if (predictionsRemaining > 0) {
                     predictionsRemaining--;
+                    
+                    // Если это первое использование, устанавливаем время сброса
+                    if (predictionsRemaining === 4) {
+                        lastPredictionTime = new Date();
+                        resetTime = new Date(lastPredictionTime.getTime() + 24 * 60 * 60 * 1000); // +24 часа
+                        startTimer();
+                    }
+                    
                     saveState();
                     updatePredictionsCounter();
                     return true;
                 }
                 return false;
+            }
+            
+            // Запуск таймера
+            function startTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                timerInterval = setInterval(function() {
+                    const now = new Date();
+                    const timeLeft = resetTime - now;
+                    
+                    if (timeLeft <= 0) {
+                        // Время вышло, сбрасываем счетчик
+                        clearInterval(timerInterval);
+                        predictionsRemaining = 5;
+                        lastPredictionTime = null;
+                        resetTime = null;
+                        saveState();
+                        updatePredictionsCounter();
+                    } else {
+                        // Обновляем отображение таймера
+                        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        
+                        timerDisplay.textContent = 
+                            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }, 1000);
             }
             
             // Инициализация состояния
@@ -1707,38 +1914,65 @@
                 }
             });
             
-            // Переход к шагу 3
+            // Улучшенная функция проверки команды
+            function isValidTeam(teamName) {
+                // Более гибкая проверка с учетом регистра и небольших опечаток
+                const normalizedInput = teamName.toLowerCase().replace(/\s+/g, ' ').trim();
+                return footballTeams.some(team => {
+                    const normalizedTeam = team.toLowerCase();
+                    return normalizedTeam === normalizedInput || 
+                           normalizedTeam.includes(normalizedInput) ||
+                           normalizedInput.includes(normalizedTeam);
+                });
+            }
+            
+            // Улучшенный переход к шагу 3
             next2Button.addEventListener('click', function() {
                 playSound(clickSound);
                 team2 = team2Input.value.trim();
                 
-                if (isValidTeam(team2) && team1 !== team2) {
+                // Проверяем команды
+                const isTeam2Valid = isValidTeam(team2);
+                const areTeamsDifferent = team1 !== team2;
+                
+                if (isTeam2Valid && areTeamsDifferent) {
                     error2.style.display = 'none';
-                    step2.classList.remove('active');
-                    step3.classList.add('active');
-                    currentStep = 3;
                     
-                    // Обновляем названия команд в предварительном просмотре
-                    homeTeam.textContent = team1;
-                    awayTeam.textContent = team2;
-                    homeLogo.textContent = getTeamAbbreviation(team1);
-                    awayLogo.textContent = getTeamAbbreviation(team2);
+                    // Плавный переход с звуком
+                    playSound(transitionSound);
+                    
+                    // Сначала скрываем текущий шаг
+                    step2.style.opacity = '0';
+                    step2.style.transform = 'translateX(-20px)';
+                    
+                    setTimeout(() => {
+                        step2.classList.remove('active');
+                        step3.classList.add('active');
+                        currentStep = 3;
+                        
+                        // Показываем новый шаг с анимацией
+                        setTimeout(() => {
+                            step3.style.opacity = '1';
+                            step3.style.transform = 'translateX(0)';
+                        }, 50);
+                        
+                        // Обновляем названия команд
+                        homeTeam.textContent = team1;
+                        awayTeam.textContent = team2;
+                        homeLogo.textContent = getTeamAbbreviation(team1);
+                        awayLogo.textContent = getTeamAbbreviation(team2);
+                    }, 300);
+                    
                 } else {
-                    if (team1 === team2) {
+                    if (!areTeamsDifferent) {
                         error2.textContent = 'Выберите другую команду, отличную от первой';
                     } else {
-                        error2.textContent = 'Впишите полное название команды или же другую команду';
+                        error2.textContent = 'Команда не найдена. Проверьте написание или выберите другую команду';
                     }
                     error2.style.display = 'block';
                     playSound(errorSound);
                 }
             });
-            
-            // Проверка валидности команды (строгая проверка)
-            function isValidTeam(teamName) {
-                // Проверяем точное соответствие (с учетом регистра)
-                return footballTeams.some(team => team === teamName);
-            }
             
             // Получение аббревиатуры команды
             function getTeamAbbreviation(teamName) {
@@ -1823,7 +2057,7 @@
                 playSound(clickSound);
                 
                 if (!canMakePrediction()) {
-                    alert('Вы использовали все 5 прогнозов. Больше прогнозов не доступно.');
+                    alert('Вы использовали все 5 прогнозов. Следующие прогнозы будут доступны через 24 часа.');
                     playSound(errorSound);
                     return;
                 }
@@ -1873,32 +2107,29 @@
                     loadingItem3.classList.add('active');
                 }, 3500);
                 
-                // Показываем кнопку получения сигнала
+                // Автоматически показываем результаты после завершения анимации
                 setTimeout(function() {
                     loadingItem3.classList.add('completed');
-                    getSignalButton.style.display = 'inline-block';
+                    
+                    // Скрываем кнопку "Получить сигнал" и сразу показываем результаты
+                    getSignalButton.style.display = 'none';
+                    
+                    // Плавно показываем результаты
+                    setTimeout(function() {
+                        loading.style.display = 'none';
+                        resultsContainer.style.display = 'block';
+                        
+                        // Генерируем прогноз
+                        generateNewPrediction();
+                        
+                        // Показываем кнопку для нового сигнала
+                        newSignalButton.style.display = 'inline-block';
+                        
+                        // Воспроизводим звук успеха
+                        playSound(successSound);
+                    }, 500);
                 }, 5000);
             }
-            
-            // Обработчик кнопки получения сигнала
-            getSignalButton.addEventListener('click', function() {
-                playSound(clickSound);
-                
-                // Скрываем индикатор загрузки
-                loading.style.display = 'none';
-                
-                // Показываем результаты
-                resultsContainer.style.display = 'block';
-                
-                // Генерируем новый формат прогноза
-                generateNewPrediction();
-                
-                // Показываем кнопку для нового сигнала
-                newSignalButton.style.display = 'inline-block';
-                
-                // Воспроизводим звук успеха
-                playSound(successSound);
-            });
             
             // Функция для генерации нового формата прогноза
             function generateNewPrediction() {
