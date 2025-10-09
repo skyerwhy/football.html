@@ -686,9 +686,97 @@
                 font-size: 12px;
             }
         }
+        
+        /* Новые стили для лучшего сигнала и точности */
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+        
+        .prediction-header-item {
+            flex: 1;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            padding: 12px 10px;
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        
+        .prediction-header-value {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--accent);
+        }
+        
+        .prediction-header-label {
+            color: var(--light);
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .prediction-detail-item.high-probability .prediction-detail-value {
+            font-size: 11px;
+            color: var(--light);
+        }
+        
+        /* Стили для таймера */
+        .timer-container {
+            background: rgba(255, 82, 82, 0.1);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-top: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            display: none;
+            font-size: 14px;
+        }
+        
+        .timer {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 16px;
+        }
+        
+        /* Стили для глобального таймера */
+        .global-timer {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(255, 82, 82, 0.2);
+            border-radius: 10px;
+            padding: 10px 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 82, 82, 0.4);
+            font-size: 14px;
+            z-index: 999;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+        
+        .global-timer-text {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--light);
+        }
+        
+        .global-timer-value {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
+    <!-- Глобальный таймер -->
+    <div class="global-timer" id="global-timer">
+        <div class="global-timer-text">Обновление попыток через:</div>
+        <div class="global-timer-value" id="global-timer-value">24:00:00</div>
+    </div>
+
     <header>
         <div class="container">
             <div class="header-content">
@@ -722,7 +810,7 @@
                 <!-- Шаг 1: Ввод первой команды -->
                 <div class="input-step active" id="step1">
                     <h3 class="step-title">Введите первую команду</h3>
-                    <input type="text" class="team-input" id="team1-input" placeholder="Например, Реал Мадрид">
+                    <input type="text" class="team-input" id="team1-input" placeholder="Например, Спартак Москва">
                     <p class="input-hint">Вводите полное название команды</p>
                     <p class="error-message" id="error1">Введите полное название команды</p>
                     <button class="next-button" id="next1">Далее</button>
@@ -731,7 +819,7 @@
                 <!-- Шаг 2: Ввод второй команды -->
                 <div class="input-step" id="step2">
                     <h3 class="step-title">Введите вторую команду</h3>
-                    <input type="text" class="team-input" id="team2-input" placeholder="Например, Барселона">
+                    <input type="text" class="team-input" id="team2-input" placeholder="Например, Динамо Москва">
                     <p class="input-hint">Вводите полное название команды</p>
                     <p class="error-message" id="error2">Введите полное название команды</p>
                     <button class="next-button" id="next2">Далее</button>
@@ -779,14 +867,15 @@
                     <div class="prediction-result">
                         <h3 class="prediction-title">Прогноз на матч</h3>
                         
-                        <div class="prediction-main">
-                            <div class="prediction-main-item">
-                                <div class="prediction-main-value" id="accuracy-value">0%</div>
-                                <div class="prediction-main-label">ТОЧНОСТЬ</div>
+                        <!-- Новый блок для лучшего сигнала и точности -->
+                        <div class="prediction-header">
+                            <div class="prediction-header-item">
+                                <div class="prediction-header-value" id="best-signal-value">-</div>
+                                <div class="prediction-header-label">ЛУЧШИЙ СИГНАЛ</div>
                             </div>
-                            <div class="prediction-main-item">
-                                <div class="prediction-main-value" id="signal-value">-</div>
-                                <div class="prediction-main-label">СИГНАЛ</div>
+                            <div class="prediction-header-item">
+                                <div class="prediction-header-value" id="accuracy-value">0%</div>
+                                <div class="prediction-header-label">ТОЧНОСТЬ</div>
                             </div>
                         </div>
                         
@@ -827,8 +916,17 @@
                     </div>
                     
                     <div class="predictions-counter" id="predictions-counter">
-                        Доступно прогнозов: <span id="predictions-left">неограниченно</span>
+                        Доступно прогнозов: <span id="predictions-left">5</span>
                     </div>
+                    
+                    <div class="timer-container" id="timer-container">
+                        Обновление попыток через: <span class="timer" id="timer">24:00:00</span>
+                    </div>
+                </div>
+                
+                <div class="limit-message" id="limit-message">
+                    Вы использовали все доступные попытки. Новые попытки будут доступны через 24 часа.
+                    <div class="timer" id="limit-timer" style="margin-top: 10px;">24:00:00</div>
                 </div>
             </div>
         </div>
@@ -855,7 +953,7 @@
                     <ul>
                         <li>Используйте полные названия команд</li>
                         <li>Загружайте четкие скриншоты</li>
-                        <li>Неограниченное количество прогнозов</li>
+                        <li>Доступно 5 попыток в сутки</li>
                         <li>При проблемах — обновите страницу</li>
                     </ul>
                 </div>
@@ -935,10 +1033,16 @@
             const awayLogo = document.getElementById('away-logo');
             const newSignalButton = document.getElementById('new-signal-button');
             const predictionsLeft = document.getElementById('predictions-left');
+            const timerContainer = document.getElementById('timer-container');
+            const timerElement = document.getElementById('timer');
+            const limitMessage = document.getElementById('limit-message');
+            const limitTimer = document.getElementById('limit-timer');
+            const globalTimer = document.getElementById('global-timer');
+            const globalTimerValue = document.getElementById('global-timer-value');
             
             // Элементы прогноза
             const accuracyValue = document.getElementById('accuracy-value');
-            const signalValue = document.getElementById('signal-value');
+            const bestSignalValue = document.getElementById('best-signal-value');
             const totalOverValue = document.getElementById('total-over-value');
             const totalUnderValue = document.getElementById('total-under-value');
             const totalUnder35Value = document.getElementById('total-under35-value');
@@ -951,22 +1055,215 @@
             let currentStep = 1;
             let team1 = '';
             let team2 = '';
+            let attemptsLeft = 5;
+            let timerInterval = null;
             
-            // База данных футбольных команд
+            // База данных футбольных команд с российскими командами
             const footballTeams = [
+                // Российские команды
+                'Спартак Москва', 'Спартак', 'Динамо Москва', 'Динамо', 'ЦСКА Москва', 'ЦСКА',
+                'Зенит Санкт-Петербург', 'Зенит', 'Локомотив Москва', 'Локомотив', 
+                'Краснодар', 'Ростов', 'Ахмат Грозный', 'Ахмат', 'Крылья Советов Самара', 'Крылья Советов',
+                'Факел Воронеж', 'Факел', 'Урал Екатеринбург', 'Урал', 'Сочи', 'Оренбург',
+                'Пари Нижний Новгород', 'Балтика Калининград', 'Балтика', 'Рубин Казань', 'Рубин',
+                'Торпедо Москва', 'Алания Владикавказ', 'Алания', 'Анжи Махачкала', 'Анжи',
+                
+                // Англия
                 'Арсенал', 'Астон Вилла', 'Борнмут', 'Брайтон', 'Бернли', 'Брентфорд', 
                 'Вест Хэм', 'Вулверхэмптон', 'Кристал Пэлас', 'Ливерпуль', 'Лутон Таун', 
                 'Манчестер Сити', 'Манчестер Юнайтед', 'Ноттингем Форест', 'Ньюкасл', 
-                'Тоттенхэм', 'Фулхэм', 'Челси', 'Шеффилд Юнайтед', 'Эвертон', 'Барселона',
-                'Реал Мадрид', 'Атлетико Мадрид', 'Севилья', 'Валенсия', 'Вильярреал',
-                'Бавария', 'Боруссия Дортмунд', 'Байер Леверкузен', 'РБ Лейпциг', 'Ювентус',
-                'Милан', 'Интер', 'Наполи', 'Рома', 'Лацио', 'ПСЖ', 'Олимпик Лион', 'Монако'
+                'Тоттенхэм', 'Фулхэм', 'Челси', 'Шеффилд Юнайтед', 'Эвертон',
+                'Лестер Сити', 'Саутгемптон', 'Лидс Юнайтед', 'Норвич Сити', 'Уотфорд',
+                
+                // Испания
+                'Барселона', 'Реал Мадрид', 'Атлетико Мадрид', 'Севилья', 'Валенсия', 
+                'Вильярреал', 'Реал Бетис', 'Атлетик Бильбао', 'Реал Сосьедад', 'Осасуна',
+                
+                // Германия
+                'Бавария', 'Боруссия Дортмунд', 'Байер Леверкузен', 'РБ Лейпциг', 
+                'Боруссия Мёнхенгладбах', 'Айнтрахт Франкфурт', 'Вольфсбург', 'Хоффенхайм',
+                
+                // Италия
+                'Ювентус', 'Милан', 'Интер', 'Наполи', 'Рома', 'Лацио', 'Аталанта', 
+                'Фиорентина', 'Болонья', 'Сассуоло', 'Удинезе', 'Торино',
+                
+                // Франция
+                'ПСЖ', 'Олимпик Лион', 'Монако', 'Марсель', 'Лилль', 'Ренн',
+                'Ницца', 'Ланс', 'Нант', 'Страсбур', 'Монпелье', 'Реймс',
+                
+                // Португалия
+                'Бенфика', 'Порту', 'Спортинг', 'Брага', 'Витория Гимарайнш',
+                
+                // Нидерланды
+                'Аякс', 'ПСВ', 'Фейеноорд', 'АЗ Алкмар', 'Твенте', 'Утрехт',
+                
+                // Турция
+                'Галатасарай', 'Фенербахче', 'Бешикташ', 'Трабзонспор', 'Башакшехир',
+                
+                // Украина
+                'Шахтер Донецк', 'Динамо Киев', 'Днепр-1', 'Заря Луганск', 'Ворскла',
+                
+                // Беларусь
+                'БАТЭ', 'Динамо Минск', 'Шахтер Солигорск', 'Торпедо-БелАЗ', 'Неман',
+                
+                // Казахстан
+                'Астана', 'Кайрат', 'Тобол', 'Ордабасы', 'Шахтер Караганда',
+                
+                // Другие известные команды
+                'Селтик', 'Рейнджерс', 'Андерлехт', 'Брюгге', 'Олимпиакос', 'Панатинаикос',
+                'Црвена Звезда', 'Партизан', 'Динамо Загреб', 'Ференцварош', 'Легия',
+                'Спарта Прага', 'Славия Прага', 'Лудогорец', 'Бока Хуниорс', 'Ривер Плейт',
+                'Сан-Паулу', 'Коринтианс', 'Палмейрас', 'Фламенго', 'Америка', 'Гвадалахара',
+                'Ульсан Хёндэ', 'Аль-Хиляль', 'Аль-Ахли'
             ];
             
             // Инициализация
             function init() {
-                predictionsLeft.textContent = 'неограниченно';
+                loadAttemptsData();
                 setupEventListeners();
+                updateUI();
+                startTimer();
+                updateGlobalTimer();
+                updateLimitTimer();
+            }
+            
+            // Загрузка данных о попытках из localStorage
+            function loadAttemptsData() {
+                const savedData = localStorage.getItem('footballAI_attempts');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    attemptsLeft = data.attemptsLeft;
+                    
+                    // Проверяем, не истекло ли время с последнего обновления
+                    const now = new Date().getTime();
+                    const timePassed = now - data.lastUpdate;
+                    const hoursPassed = timePassed / (1000 * 60 * 60);
+                    
+                    if (hoursPassed >= 24) {
+                        // Прошло 24 часа, сбрасываем попытки
+                        attemptsLeft = 5;
+                        saveAttemptsData();
+                    }
+                } else {
+                    // Первый запуск
+                    saveAttemptsData();
+                }
+            }
+            
+            // Сохранение данных о попытках в localStorage
+            function saveAttemptsData() {
+                const data = {
+                    attemptsLeft: attemptsLeft,
+                    lastUpdate: new Date().getTime()
+                };
+                localStorage.setItem('footballAI_attempts', JSON.stringify(data));
+            }
+            
+            // Обновление интерфейса
+            function updateUI() {
+                predictionsLeft.textContent = attemptsLeft;
+                
+                if (attemptsLeft <= 0) {
+                    step1.style.display = 'none';
+                    step2.style.display = 'none';
+                    step3.style.display = 'none';
+                    loading.style.display = 'none';
+                    resultsContainer.style.display = 'none';
+                    limitMessage.style.display = 'block';
+                    timerContainer.style.display = 'block';
+                    globalTimer.style.display = 'block';
+                } else {
+                    limitMessage.style.display = 'none';
+                    timerContainer.style.display = 'none';
+                    globalTimer.style.display = 'none';
+                }
+            }
+            
+            // Запуск таймера
+            function startTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                timerInterval = setInterval(updateTimer, 1000);
+                updateTimer();
+            }
+            
+            // Обновление таймера
+            function updateTimer() {
+                const savedData = localStorage.getItem('footballAI_attempts');
+                if (!savedData) return;
+                
+                const data = JSON.parse(savedData);
+                const now = new Date().getTime();
+                const timePassed = now - data.lastUpdate;
+                const timeRemaining = 24 * 60 * 60 * 1000 - timePassed;
+                
+                if (timeRemaining <= 0) {
+                    // Время вышло, обновляем попытки
+                    attemptsLeft = 5;
+                    saveAttemptsData();
+                    updateUI();
+                    return;
+                }
+                
+                const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+                const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                
+                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Обновление глобального таймера
+            function updateGlobalTimer() {
+                const savedData = localStorage.getItem('footballAI_attempts');
+                if (!savedData) return;
+                
+                const data = JSON.parse(savedData);
+                const now = new Date().getTime();
+                const timePassed = now - data.lastUpdate;
+                const timeRemaining = 24 * 60 * 60 * 1000 - timePassed;
+                
+                if (timeRemaining <= 0) {
+                    globalTimerValue.textContent = '00:00:00';
+                    setTimeout(updateGlobalTimer, 1000);
+                    return;
+                }
+                
+                const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+                const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                
+                globalTimerValue.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Обновляем каждую секунду
+                setTimeout(updateGlobalTimer, 1000);
+            }
+            
+            // Обновление таймера в сообщении о лимите
+            function updateLimitTimer() {
+                const savedData = localStorage.getItem('footballAI_attempts');
+                if (!savedData) return;
+                
+                const data = JSON.parse(savedData);
+                const now = new Date().getTime();
+                const timePassed = now - data.lastUpdate;
+                const timeRemaining = 24 * 60 * 60 * 1000 - timePassed;
+                
+                if (timeRemaining <= 0) {
+                    limitTimer.textContent = '00:00:00';
+                    setTimeout(updateLimitTimer, 1000);
+                    return;
+                }
+                
+                const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+                const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                
+                limitTimer.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Обновляем каждую секунду
+                setTimeout(updateLimitTimer, 1000);
             }
             
             // Настройка обработчиков событий
@@ -1036,15 +1333,18 @@
                 if (isTeam2Valid && areTeamsDifferent) {
                     error2.style.display = 'none';
                     
-                    step2.classList.remove('active');
-                    step3.classList.add('active');
-                    currentStep = 3;
-                    
-                    // Обновляем названия команд
-                    homeTeam.textContent = team1;
-                    awayTeam.textContent = team2;
-                    homeLogo.textContent = getTeamAbbreviation(team1);
-                    awayLogo.textContent = getTeamAbbreviation(team2);
+                    // Используем setTimeout для предотвращения зависания
+                    setTimeout(() => {
+                        step2.classList.remove('active');
+                        step3.classList.add('active');
+                        currentStep = 3;
+                        
+                        // Обновляем названия команд
+                        homeTeam.textContent = team1;
+                        awayTeam.textContent = team2;
+                        homeLogo.textContent = getTeamAbbreviation(team1);
+                        awayLogo.textContent = getTeamAbbreviation(team2);
+                    }, 10);
                     
                 } else {
                     if (!areTeamsDifferent) {
@@ -1105,6 +1405,19 @@
                     alert('Пожалуйста, сначала загрузите скриншот ставки!');
                     return;
                 }
+                
+                // Проверяем доступные попытки
+                if (attemptsLeft <= 0) {
+                    alert('Вы использовали все доступные попытки. Новые попытки будут доступны через 24 часа.');
+                    return;
+                }
+                
+                // Уменьшаем количество попыток
+                attemptsLeft--;
+                saveAttemptsData();
+                updateUI();
+                updateGlobalTimer();
+                updateLimitTimer();
                 
                 // Показываем индикатор загрузки
                 loading.style.display = 'block';
@@ -1167,13 +1480,23 @@
                 );
                 
                 animateValue(accuracyValue, 0, accuracy, 1500);
-                signalValue.textContent = reliableSignal.name;
+                bestSignalValue.textContent = reliableSignal.name;
                 
                 setTimeout(function() {
                     animateValue(totalOverValue, 0, totalOver, 1500);
                     animateValue(totalUnderValue, 0, totalUnder, 1500);
                     animateValue(totalUnder35Value, 0, totalUnder35, 1500);
                     animateValue(bothScoreValue, 0, bothScore, 1500);
+                    
+                    // Делаем текст с большей вероятностью меньше
+                    const detailItems = document.querySelectorAll('.prediction-detail-item');
+                    detailItems.forEach(item => {
+                        const valueElement = item.querySelector('.prediction-detail-value');
+                        const value = parseInt(valueElement.textContent);
+                        if (value > 75) {
+                            item.classList.add('high-probability');
+                        }
+                    });
                     
                     setTimeout(function() {
                         totalOverFill.style.width = totalOver + '%';
@@ -1216,6 +1539,8 @@
                 step3.classList.remove('active');
                 step1.classList.add('active');
                 currentStep = 1;
+                
+                updateUI();
             }
             
             // Запуск приложения
