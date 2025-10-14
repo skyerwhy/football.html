@@ -250,6 +250,13 @@
             transition: all 0.3s;
             cursor: pointer;
             margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .upload-area.drag-over {
+            border-color: var(--accent);
+            background: rgba(0, 255, 136, 0.05);
+            transform: scale(1.02);
         }
         
         .upload-area:active {
@@ -830,7 +837,7 @@
                     <h3 class="step-title">Загрузите скриншот ставки</h3>
                     <div class="upload-area" id="upload-area">
                         <div class="upload-icon">📱</div>
-                        <p class="upload-text">Нажмите для выбора скриншота</p>
+                        <p class="upload-text">Нажмите или перетащите файл сюда</p>
                         <p class="upload-hint">JPG, PNG (макс. 10MB)</p>
                         <input type="file" id="file-input" accept="image/*">
                         <button class="upload-button" id="upload-button">Выбрать файл</button>
@@ -1121,10 +1128,78 @@
             function init() {
                 loadAttemptsData();
                 setupEventListeners();
+                setupDragAndDrop(); // Добавлена функция drag-and-drop
                 updateUI();
                 startTimer();
                 updateGlobalTimer();
                 updateLimitTimer();
+            }
+            
+            // Настройка drag-and-drop функциональности
+            function setupDragAndDrop() {
+                // Предотвращаем стандартное поведение браузера для drag событий
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    uploadArea.addEventListener(eventName, preventDefaults, false);
+                    document.body.addEventListener(eventName, preventDefaults, false);
+                });
+                
+                // Подсвечиваем область при перетаскивании
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    uploadArea.addEventListener(eventName, highlight, false);
+                });
+                
+                ['dragleave', 'drop'].forEach(eventName => {
+                    uploadArea.addEventListener(eventName, unhighlight, false);
+                });
+                
+                // Обрабатываем сброс файла
+                uploadArea.addEventListener('drop', handleDrop, false);
+                
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                
+                function highlight() {
+                    uploadArea.classList.add('drag-over');
+                }
+                
+                function unhighlight() {
+                    uploadArea.classList.remove('drag-over');
+                }
+                
+                function handleDrop(e) {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    
+                    if (files.length) {
+                        handleFiles(files);
+                    }
+                }
+            }
+            
+            // Обработка файлов при перетаскивании
+            function handleFiles(files) {
+                const file = files[0];
+                
+                if (!file.type.match('image.*')) {
+                    alert('Пожалуйста, выберите изображение!');
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Размер файла не должен превышать 10MB!');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
             }
             
             // Загрузка данных о попытках из localStorage
@@ -1376,26 +1451,7 @@
             // Обработка выбора файла
             function handleFileSelect() {
                 if (this.files && this.files[0]) {
-                    const file = this.files[0];
-                    
-                    if (!file.type.match('image.*')) {
-                        alert('Пожалуйста, выберите изображение!');
-                        return;
-                    }
-                    
-                    if (file.size > 10 * 1024 * 1024) {
-                        alert('Размер файла не должен превышать 10MB!');
-                        return;
-                    }
-                    
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        imagePreview.src = e.target.result;
-                        previewContainer.style.display = 'block';
-                    }
-                    
-                    reader.readAsDataURL(file);
+                    handleFiles(this.files);
                 }
             }
             
