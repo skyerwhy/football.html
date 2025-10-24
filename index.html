@@ -886,36 +886,7 @@
                             </div>
                         </div>
                         
-                        <div class="prediction-details-new">
-                            <div class="prediction-detail-item">
-                                <div class="prediction-detail-label">Тотал больше 2.5</div>
-                                <div class="prediction-detail-bar">
-                                    <div class="prediction-detail-fill" id="total-over-fill"></div>
-                                </div>
-                                <div class="prediction-detail-value" id="total-over-value">0%</div>
-                            </div>
-                            <div class="prediction-detail-item">
-                                <div class="prediction-detail-label">Тотал меньше 2.5</div>
-                                <div class="prediction-detail-bar">
-                                    <div class="prediction-detail-fill" id="total-under-fill"></div>
-                                </div>
-                                <div class="prediction-detail-value" id="total-under-value">0%</div>
-                            </div>
-                            <div class="prediction-detail-item">
-                                <div class="prediction-detail-label">Тотал меньше 3.5</div>
-                                <div class="prediction-detail-bar">
-                                    <div class="prediction-detail-fill" id="total-under35-fill"></div>
-                                </div>
-                                <div class="prediction-detail-value" id="total-under35-value">0%</div>
-                            </div>
-                            <div class="prediction-detail-item">
-                                <div class="prediction-detail-label">Обе забьют: да</div>
-                                <div class="prediction-detail-bar">
-                                    <div class="prediction-detail-fill" id="both-score-fill"></div>
-                                </div>
-                                <div class="prediction-detail-value" id="both-score-value">0%</div>
-                            </div>
-                        </div>
+                        <!-- Убрана секция с детальными прогнозами -->
                     </div>
                     
                     <div style="text-align: center;">
@@ -1050,14 +1021,6 @@
             // Элементы прогноза
             const accuracyValue = document.getElementById('accuracy-value');
             const bestSignalValue = document.getElementById('best-signal-value');
-            const totalOverValue = document.getElementById('total-over-value');
-            const totalUnderValue = document.getElementById('total-under-value');
-            const totalUnder35Value = document.getElementById('total-under35-value');
-            const bothScoreValue = document.getElementById('both-score-value');
-            const totalOverFill = document.getElementById('total-over-fill');
-            const totalUnderFill = document.getElementById('total-under-fill');
-            const totalUnder35Fill = document.getElementById('total-under35-fill');
-            const bothScoreFill = document.getElementById('both-score-fill');
             
             let currentStep = 1;
             let team1 = '';
@@ -1455,48 +1418,25 @@
             // Генерация прогноза
             function generateNewPrediction() {
                 const accuracy = Math.floor(Math.random() * (94 - 75 + 1)) + 75;
-                const totalOver = Math.floor(Math.random() * (83 - 67 + 1)) + 67;
-                const totalUnder = Math.floor(Math.random() * (77 - 65 + 1)) + 65;
-                const totalUnder35 = Math.floor(Math.random() * (69 - 57 + 1)) + 57;
-                const bothScore = Math.floor(Math.random() * (88 - 57 + 1)) + 57;
                 
+                // Список возможных сигналов с расширенными вариантами
                 const signals = [
-                    {name: "Тотал больше 2.5", value: totalOver},
-                    {name: "Тотал меньше 2.5", value: totalUnder},
-                    {name: "Тотал меньше 3.5", value: totalUnder35},
-                    {name: "Обе забьют: да", value: bothScore}
+                    {name: "Обе забьют: да", value: Math.floor(Math.random() * (88 - 57 + 1)) + 57},
+                    {name: "Тотал больше 2.5", value: Math.floor(Math.random() * (83 - 67 + 1)) + 67},
+                    {name: "Тотал меньше 2.5", value: Math.floor(Math.random() * (77 - 65 + 1)) + 65},
+                    {name: "Тотал меньше 3.5", value: Math.floor(Math.random() * (69 - 57 + 1)) + 57},
+                    {name: "Ф1(0)", value: Math.floor(Math.random() * (85 - 60 + 1)) + 60},
+                    {name: "Ф2(0)", value: Math.floor(Math.random() * (85 - 60 + 1)) + 60},
+                    {name: "1X", value: Math.floor(Math.random() * (80 - 55 + 1)) + 55},
+                    {name: "X2", value: Math.floor(Math.random() * (80 - 55 + 1)) + 55}
                 ];
                 
-                const reliableSignal = signals.reduce((max, signal) => 
-                    signal.value > max.value ? signal : max
-                );
+                // Выбираем случайный сигнал как лучший
+                const randomIndex = Math.floor(Math.random() * signals.length);
+                const bestSignal = signals[randomIndex];
                 
                 animateValue(accuracyValue, 0, accuracy, 1500);
-                bestSignalValue.textContent = reliableSignal.name;
-                
-                setTimeout(function() {
-                    animateValue(totalOverValue, 0, totalOver, 1500);
-                    animateValue(totalUnderValue, 0, totalUnder, 1500);
-                    animateValue(totalUnder35Value, 0, totalUnder35, 1500);
-                    animateValue(bothScoreValue, 0, bothScore, 1500);
-                    
-                    // Делаем текст с большей вероятностью меньше
-                    const detailItems = document.querySelectorAll('.prediction-detail-item');
-                    detailItems.forEach(item => {
-                        const valueElement = item.querySelector('.prediction-detail-value');
-                        const value = parseInt(valueElement.textContent);
-                        if (value > 75) {
-                            item.classList.add('high-probability');
-                        }
-                    });
-                    
-                    setTimeout(function() {
-                        totalOverFill.style.width = totalOver + '%';
-                        totalUnderFill.style.width = totalUnder + '%';
-                        totalUnder35Fill.style.width = totalUnder35 + '%';
-                        bothScoreFill.style.width = bothScore + '%';
-                    }, 1600);
-                }, 500);
+                bestSignalValue.textContent = bestSignal.name;
             }
             
             // Анимация числовых значений
@@ -1522,11 +1462,6 @@
                 previewContainer.style.display = 'none';
                 resultsContainer.style.display = 'none';
                 newSignalButton.style.display = 'none';
-                
-                totalOverFill.style.width = '0%';
-                totalUnderFill.style.width = '0%';
-                totalUnder35Fill.style.width = '0%';
-                bothScoreFill.style.width = '0%';
                 
                 step3.classList.remove('active');
                 step1.classList.add('active');
